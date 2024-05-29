@@ -9,7 +9,7 @@ class VideoManager:
     def add_video(self, video_path,metadata):
         """Add a video to the library."""
         self.library.append(video_path)
-        
+    
 
     def list_videos(self):
         """List all videos in the library."""

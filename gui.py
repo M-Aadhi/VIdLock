@@ -2,15 +2,44 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog
 from video_player import VideoPlayer
 from video_manager import VideoManager
+from database import VideoDatabase
+import os
+import threading
 
 class VidLockGUI:
-    def __init__(self, root,video_manager=None):
+    def __init__(self, root,video_manager):
         self.root = root
-        self.video_manager = video_manager
+        self.video_frame = tk.Frame(self.root, bg='black')
+        self.video_manager = VideoManager()
         self.video_player = VideoPlayer()
+        self.video_db = VideoDatabase()
         self.create_widgets()
+        self.bind_keys()
+
+    def bind_keys(self):
+        self.root.bind("<Left>", lambda event: self.seek_backward())
+        self.root.bind("<Right>", lambda event: self.seek_forward())
+
+    def seek_forward(self):
+        current_time = self.video_player.get_time()
+        new_time = current_time + 5000  # Seek forward 5 seconds
+        self.video_player.set_time(new_time)
+
+    def seek_backward(self):
+        current_time = self.video_player.get_time()
+        new_time = current_time - 5000  # Seek backward 5 seconds
+        self.video_player.set_time(new_time)
     
     def create_widgets(self):
+        
+        style = ttk.Style(self.root)
+        style.configure("TScale",
+                background="black",
+                troughcolor="gray",
+                sliderthickness=20,
+                relief="flat")
+
+
         self.video_frame = tk.Frame(self.root, bg='black')
         self.video_frame.pack(fill=tk.BOTH, expand=True)
 
@@ -23,9 +52,6 @@ class VidLockGUI:
         self.pause_button = tk.Button(self.control_frame, text="Pause Video", command=self.pause_video)
         self.pause_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-        self.stop_button = tk.Button(self.control_frame, text="Stop Video", command=self.stop_video)
-        self.stop_button.pack(side=tk.LEFT, padx=5, pady=5)
-
         self.favorite_button = tk.Button(self.control_frame, text="Mark as Favorite", command=self.mark_favorite)
         self.favorite_button.pack(side=tk.LEFT, padx=5, pady=5)
 
@@ -37,12 +63,22 @@ class VidLockGUI:
         self.volume_slider.set(50)
         self.volume_slider.pack(side=tk.LEFT, padx=5, pady=5)
 
-        self.progress = ttk.Progressbar(self.control_frame, orient=tk.HORIZONTAL, length=200, mode='determinate')
-        self.progress.pack(side=tk.LEFT, padx=5, pady=5)
-
         self.library_button = tk.Button(self.control_frame, text="VidLock Library", command=self.open_library_window)
         self.library_button.pack(side=tk.LEFT, padx=5, pady=5)
 
+        self.progress = ttk.Scale(self.control_frame, orient=tk.HORIZONTAL, length=700, from_=0, to=100, style="TScale", command=self.on_progress_change)
+        self.progress.pack(side=tk.LEFT, padx=5, pady=5)
+
+        self.backward_button = tk.Button(self.control_frame, text="<< Backward", command=self.seek_backward)
+        self.backward_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+        self.forward_button = tk.Button(self.control_frame, text="Forward >>", command=self.seek_forward)
+        self.forward_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+    def on_progress_change(self, value):
+        total_length = self.video_player.get_length()
+        new_time = int(float(value) / 100 * total_length)
+        self.video_player.set_time(new_time)
 
     def update_progress(self, progress):
         self.progress['value'] = progress * 100

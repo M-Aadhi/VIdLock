@@ -1,19 +1,34 @@
 # video_manager.py
+from PIL import Image, ImageTk
+import cv2
+import os
+from database import VideoDatabase
 
 class VideoManager:
     def __init__(self):
-        self.library = {}      # Dictionary to store video paths and metadata
-        self.favorites = {}    # Dictionary to store favorite videos
-        self.personal = {}   # Dictionary to store video passwords
+        self.video_db = VideoDatabase()   # Dictionary to store video passwords
 
-    def add_video(self, video_path,metadata):
-        """Add a video to the library."""
-        self.library.append(video_path)
+    def extract_thumbnail(self, video_path):
+        capture = cv2.VideoCapture(video_path)
+        success, frame = capture.read()
+        capture.release()
+        if success:
+            thumbnail_path = video_path + "_thumbnail.jpg"
+            cv2.imwrite(thumbnail_path, frame)
+            return thumbnail_path
+        return None
+    
+    def add_video(self, video_path, metadata):
+        thumbnail_path = self.extract_thumbnail(video_path)
+        title = os.path.basename(video_path)
+        duration = metadata.get('duration', '')
+        resolution = metadata.get('resolution', '')
+        self.video_db.add_video(video_path, title, duration, resolution, thumbnail_path)
+
     
 
     def list_videos(self):
-        """List all videos in the library."""
-        return 
+        return self.video_db.get_all_videos()
     
     def get_video_metadata(self, video_path):
         """Get metadata for a specific video."""

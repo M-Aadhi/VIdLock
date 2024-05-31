@@ -3,6 +3,7 @@ from tkinter import ttk, filedialog, messagebox, simpledialog
 from video_player import VideoPlayer
 from video_manager import VideoManager
 from database import VideoDatabase
+from PIL import Image, ImageTk
 import os
 import threading
 
@@ -112,12 +113,39 @@ class VidLockGUI:
         if video_path:
             metadata = {}  # Placeholder for metadata, can be obtained from the user or extracted from the video file
             self.video_manager.add_video(video_path, metadata)
+            self.list_videos()
 
     def list_videos(self):
-        self.listbox.delete(0, tk.END)
+        for widget in self.library_window.winfo_children():
+            widget.destroy()
+
         videos = self.video_manager.list_videos()
         for video in videos:
-            self.listbox.insert(tk.END, video)
+            video_path = video[1]
+            title = video[2]
+            thumbnail_path = video[5]
+            self.add_video_to_library(video_path, thumbnail_path, title)
+
+
+    def add_video_to_library(self, video_path, thumbnail_path, title):
+        frame = tk.Frame(self.library_window)
+        frame.pack(padx=10, pady=10)
+
+        if thumbnail_path and os.path.exists(thumbnail_path):
+            img = Image.open(thumbnail_path)
+            img = img.resize((120, 90), Image.Resampling.LANCZOS)
+            photo = ImageTk.PhotoImage(img)
+            label = tk.Label(frame, image=photo)
+            label.image = photo
+            label.pack(side=tk.LEFT)
+
+        title_label = tk.Label(frame, text=title)
+        title_label.pack(side=tk.LEFT, padx=10)
+        title_label.bind("<Button-1>", lambda event, path=video_path: self.play_selected_video(path))
+
+    def play_selected_video(self, video_path):
+        self.video_player.set_window(self.get_handle())
+        self.video_player.play(video_path)
 
     def show_fav_videos(self):
         fav_videos = self.video_manager.list_favorites()
@@ -134,6 +162,7 @@ class VidLockGUI:
     def open_library_window(self):
         self.library_window = tk.Toplevel(self.root)
         self.library_window.title("VidLock Library")
+        self.library_window.geometry("800x600")
 
         add_video_button = tk.Button(self.library_window, text="Add Videos to Library", command=self.add_video)
         add_video_button.pack(pady=10)
@@ -146,5 +175,7 @@ class VidLockGUI:
 
         private_videos_button = tk.Button(self.library_window, text="Private Videos", command=self.show_private_videos)
         private_videos_button.pack(pady=10)
+
+        
 
     

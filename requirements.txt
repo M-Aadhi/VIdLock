@@ -1,0 +1,4 @@
+opencv-python==4.5.3.56
+Pillow==8.2.0
+python-vlc==3.0.20123
+yarl==1.9.4

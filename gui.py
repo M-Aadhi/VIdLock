@@ -5,7 +5,7 @@ from video_manager import VideoManager
 from database import VideoDatabase
 from PIL import Image, ImageTk
 import os
-import threading
+
 
 class VidLockGUI:
     def __init__(self, root,video_manager):

@@ -4,7 +4,6 @@ from tkinter import filedialog, messagebox ,ttk
 from gui import VidLockGUI
 from video_manager import VideoManager
 from video_player import VideoPlayer
-import threading
 
 class VidLockApp:
     def __init__(self):

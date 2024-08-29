@@ -3,6 +3,7 @@
 import vlc
 import time
 import threading
+import os
 
 class VideoPlayer:
     def __init__(self):

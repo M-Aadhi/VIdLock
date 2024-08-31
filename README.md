@@ -18,7 +18,7 @@ VidLock is a simple video player application with features for managing video fi
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/your_username/VidLock.git
+   git clone https://github.com/M-Aadhi/VidLock.git
    ```
 
 2. **Install dependencies:**
